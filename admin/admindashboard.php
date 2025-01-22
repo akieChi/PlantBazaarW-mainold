@@ -4,7 +4,7 @@ include '../conn.php'; // Include your connection file
 
 // Check if the admin is logged in
 if (!isset($_SESSION['admin'])) {
-    header('Location: adminlogin.php');
+    header('Location: secureaccess2024.php');
     exit();
 }
 
@@ -243,7 +243,7 @@ button {
             </div>
             <div class="summary-box">
                 <h2>Total Reports</h2>
-                <p><strong><?php ; ?></strong></p>
+                <p><strong><?php echo $totalReportedUsers; ?></strong></p>
             </div>
         </div>
 

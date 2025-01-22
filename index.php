@@ -127,7 +127,7 @@ $(document).ready(function() {
                         // Show "Chat Seller" button if the logged-in user is not the seller
                         let chatSellerButton = '';
                         if (currentUserEmail && currentUserEmail !== product.seller_email) {
-                            chatSellerButton = `<button class="chat-seller" data-email="${product.seller_email}">Chat Seller</button>`;
+                            chatSellerButton = `<button class="chat-seller1" data-email="${product.seller_email}" data-id="${product.plantid}">Chat Seller</button>`;
                             
                         }
                       
@@ -227,20 +227,20 @@ $(document).ready(function() {
                         type: 'hidden',
                         name: 'plantId',
                         value: plantId
-                    })).append($('<input>', {
-                        type: 'hidden',
-                        name: 'sellerEmail',
-                        value: sellerEmail
                     }));
 
                     $('body').append(form);
                     form.submit();
                 });
 
-                $(document).on('click', '.chat-seller', function() {
+                $(document).on('click', '.chat-seller1', function() {
                     let sellerEmail = $(this).data('email');
+                    let plantId = $(this).data('id');
+
                     console.log(`Chat Seller button clicked: Seller Email=${sellerEmail}`); // Log the seller email
-                    window.location.href = `chat_upgrade/chat.php?seller_email=${encodeURIComponent(sellerEmail)}`;
+                    console.log(`View Details button clicked: Plant ID=${plantId}`); // Log the plant ID.
+                    // Redirect to chat page with seller email as a query parameter
+                    window.location.href = `chat_upgrade/chat.php?seller_email=${encodeURIComponent(sellerEmail)}&plantid=${encodeURIComponent(plantId)}`;
                 });
             } catch (error) {
                 console.error('Error parsing JSON:', error);

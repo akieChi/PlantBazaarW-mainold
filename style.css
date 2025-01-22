@@ -109,7 +109,7 @@
     }
 
 
-    button.chat-seller {
+    button.chat-seller1 {
         padding: 10px 10px;
         border: none;
         border-radius: 10px; /* Rounder buttons */
@@ -120,11 +120,11 @@
         font-size: 13px;
         margin-left: 20px;
     }
-    button.chat-seller {
+    button.chat-seller1 {
         background-color: black;
     }
     
-    button.chat-seller:hover {
+    button.chat-seller1:hover {
         background-color: #333;
     }
     

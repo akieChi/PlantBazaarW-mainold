@@ -2,6 +2,6 @@
 session_start();
 session_unset();
 session_destroy();
-header('Location: adminlogin.php');
+header('Location: secureacess2024.php');
 exit();
 ?>

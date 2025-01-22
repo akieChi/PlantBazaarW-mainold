@@ -30,7 +30,7 @@ $offset = ($page - 1) * $productsPerPage;
 // Get listing_status (1 for available, 2 for sold)
 $listingStatus = isset($_GET['listing_status']) ? (int)$_GET['listing_status'] : 1; 
 
-// Fetch products listed by this seller
+// Fetch products listed by this seller for the current page
 $productQuery = "
     SELECT *, 
            (SELECT email FROM sellers WHERE user_id = users.id) AS seller_email 
@@ -39,7 +39,7 @@ $productQuery = "
     JOIN users ON sellers.user_id = users.id 
     WHERE users.email = '$email' 
     AND product.listing_status = $listingStatus 
-    LIMIT $productsPerPage OFFSET $offset";
+   ";
 
 $productResult = mysqli_query($conn, $productQuery);
 
@@ -53,6 +53,7 @@ while ($product = mysqli_fetch_assoc($productResult)) {
     $products[] = $product;
 }
 
+// Get the total number of products (without pagination)
 $totalQuery = "
     SELECT COUNT(*) AS total 
     FROM product 
@@ -63,8 +64,23 @@ $totalQuery = "
 $totalResult = mysqli_query($conn, $totalQuery);
 $total = mysqli_fetch_assoc($totalResult)['total'];
 
+// Calculate total profit (sum of all product prices for the seller)
+$profitQuery = "
+    SELECT SUM(price) AS total_profit
+    FROM product 
+    JOIN sellers ON product.added_by = sellers.seller_id 
+    JOIN users ON sellers.user_id = users.id 
+    WHERE users.email = '$email' 
+    AND product.listing_status = $listingStatus";
+$profitResult = mysqli_query($conn, $profitQuery);
+$profit = mysqli_fetch_assoc($profitResult)['total_profit'];
+
+// If no profit found, set it to 0
+$profit = $profit ? $profit : 0;
+
 echo json_encode([
-'products' => $products,
-'total' => $total
+    'products' => $products,
+    'total' => $total,
+    'total_profit' => $profit // Add the total profit to the response
 ]);
 ?>

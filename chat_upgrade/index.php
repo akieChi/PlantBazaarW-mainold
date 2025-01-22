@@ -127,11 +127,7 @@ $(document).on('click', '.ellipsis', function() {
     });
 
     // Click event for delete button
-    $(document).on('click', '.delete-btn', function() {
-        var messageId = $(this).data('message-id');
-        console.log('Delete message ID:', messageId);
-        // Implement delete functionality here
-    });
+
 
     // Hide options when clicking outside
     $(document).on('click', function(event) {

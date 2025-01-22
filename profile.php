@@ -32,7 +32,7 @@ if (isset($_GET['sellerId'])) {
     }
 
     // Fetch seller's listings
-    $listingsQuery = "SELECT * FROM product WHERE added_by = ?";
+    $listingsQuery = "SELECT * FROM product WHERE added_by = ? AND listing_status = 1";
     $listingsStmt = $conn->prepare($listingsQuery);
     $listingsStmt->bind_param("i", $sellerId);
     $listingsStmt->execute();
@@ -78,7 +78,7 @@ if (isset($_GET['sellerId'])) {
             echo '<p><strong>Price:</strong> ₱' . htmlspecialchars($listing['price']) . '</p>';
             echo '<p><strong>Description:</strong> ' . htmlspecialchars($listing['details']) . '</p>';
             // Modify the View More Details button to redirect to viewmoredetails.php
-            echo '<button class="view-details" onclick="viewMoreDetails(' . htmlspecialchars($listing['plantid']) . ', \'' . htmlspecialchars($sellerEmail) . '\')">View Plants</button>';
+            echo '<button class="view-details" onclick="viewMoreDetails(' . htmlspecialchars($listing['plantid']) . ', \'' . htmlspecialchars($sellerEmail) . '\')" style="background-color: darkgreen; color: white; font-size: 12px; font-weight: bold;padding: 10px; border: none; border-radius: 10px; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor=\'#4CAF50\'" onmouseout="this.style.backgroundColor=\'darkgreen\'">View Plants</button>';
             echo '</div>';
             echo '</div>';
         }
@@ -156,7 +156,7 @@ if (isset($_GET['sellerId'])) {
     // Function to handle viewing more details
     function viewMoreDetails(plantId, sellerEmail) {
         // Redirect to viewmoredetails.php with plantId and sellerEmail
-        window.location.href = 'viewmoredetails.php?plantId=' + plantId + '&sellerEmail=' + encodeURIComponent(sellerEmail);
+        window.location.href = 'viewdetails.php?plantId=' + plantId + '&sellerEmail=' + encodeURIComponent(sellerEmail);
     }
 </script>
 

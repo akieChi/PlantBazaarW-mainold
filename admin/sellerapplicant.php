@@ -4,7 +4,7 @@ include '../conn.php'; // Include connection file
 
 // Check if admin is logged in
 if (!isset($_SESSION['admin'])) {
-    header('Location: adminlogin.php');
+    header('Location: secureaccess2024.php.php');
     exit();
 }
 
@@ -293,7 +293,7 @@ $totalSoldPlants = $rowTotalSoldPlants['total_sold_plants']; // Get the total nu
             </div>
             <div class="summary-box">
                 <h2>Total Reports</h2>
-                <p><strong><?php ; ?></strong></p>
+                <p><strong><?php echo $totalReportedUsers;?></strong></p>
             </div>
         </div>
         </div>

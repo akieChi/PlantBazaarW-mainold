@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('Failed to send notification email: ' . $emailResponse['message']);
             }
 
-            echo json_encode(['success' => true, 'message' => 'User has been banned and notified.']);
+            echo json_encode(['User has been banned and notified.']);
         } elseif ($action === 'reject') {
             // Delete the report from the reports table
             $deleteReportQuery = "DELETE FROM reports WHERE id = ?";

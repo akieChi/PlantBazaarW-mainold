@@ -4,7 +4,7 @@ include '../conn.php'; // Include your connection file
 
 // Check if the admin is logged in
 if (!isset($_SESSION['admin'])) {
-    header('Location: adminlogin.php');
+    header('Location: secureaccess2024.php');
     exit();
 }
 

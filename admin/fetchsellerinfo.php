@@ -6,7 +6,7 @@ if (isset($_GET['id'])) {
     $sellerId = $_GET['id'];
 
     // Fetch seller info
-    $query = "SELECT s.*, u.email, u.phoneNumber, u.address FROM sellers s JOIN users u ON s.user_id = u.id WHERE s.seller_id = $sellerId";
+    $query = "SELECT s.*, u.email, u.phoneNumber, u.region, u.city FROM sellers s JOIN users u ON s.user_id = u.id WHERE s.seller_id = $sellerId";
     $result = mysqli_query($conn, $query);
     $seller = mysqli_fetch_assoc($result);
 

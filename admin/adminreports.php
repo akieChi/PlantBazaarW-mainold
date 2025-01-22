@@ -4,7 +4,7 @@ include '../conn.php'; // Include your connection file
 
 // Check if the admin is logged in
 if (!isset($_SESSION['admin'])) {
-    header('Location: adminlogin.php');
+    header('Location: secureaccess2024.php');
     exit();
 }
 
@@ -103,6 +103,19 @@ $queryReports = "SELECT r.reported_user, r.id, u.firstname, u.lastname, u.email,
 $resultReports = mysqli_query($conn, $queryReports);
 
 // Fetch the total number of users, sellers, applicants, and reports (already fetched in previous steps)
+
+// Fetch the total number of listed plants
+$totalListedPlantsQuery = "SELECT COUNT(*) AS total_listed_plants FROM product WHERE listing_status = 1";
+$resultTotalListedPlants = mysqli_query($conn, $totalListedPlantsQuery);
+$rowTotalListedPlants = mysqli_fetch_assoc($resultTotalListedPlants);
+$totalListedPlants = $rowTotalListedPlants['total_listed_plants']; // Get the total number of listed plants
+
+// Fetch the total number of sold plants
+$totalSoldPlantsQuery = "SELECT COUNT(*) AS total_sold_plants FROM product WHERE listing_status = 2";
+$resultTotalSoldPlants = mysqli_query($conn, $totalSoldPlantsQuery);
+$rowTotalSoldPlants = mysqli_fetch_assoc($resultTotalSoldPlants);
+$totalSoldPlants = $rowTotalSoldPlants['total_sold_plants']; // Get the total number of sold plants
+
 ?>
 
 <!DOCTYPE html>
@@ -236,22 +249,26 @@ $resultReports = mysqli_query($conn, $queryReports);
             color: #bbb;
             text-decoration: none;
             cursor: pointer;
-        }#imageModal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
+        }
+        #imageModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #imageModal img {
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-}
+    object-fit: contain;
+    max-width: 1350px;
 
-#imageModal img {
-    max-width: 90%;
-    max-height: 90%;
 }
 
 #imageModal span {
@@ -326,12 +343,15 @@ $resultReports = mysqli_query($conn, $queryReports);
     </nav>
 
     <div class="container">
-    <div id="imageModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0, 0, 0, 0.8); z-index:1000; justify-content:center; align-items:center;">
+    <div id="imageModal">
     <span onclick="closeModal()" style="color:white; position:absolute; top:20px; right:30px; font-size:30px; cursor:pointer;">&times;</span>
-    <img id="modalImage" src="" alt="Proof Image" style="max-width:90%; max-height:90%; margin:auto; display:block;">
-    <button id="prevBtn" style="position:absolute; left:10px; top:50%; transform:translateY(-50%);">Previous</button>
-    <button id="nextBtn" style="position:absolute; right:10px; top:50%; transform:translateY(-50%);">Next</button>
+    <button id="prev-btn" onclick="showPreviousImage()" style="position:absolute; top:50%; transform:translateY(-50%); left:10px; background-color:#4CAF50; color:white; border:none; cursor:pointer; border-radius:50%; font-size:20px; padding:10px 15px;">&lt;</button>
+    <img id="modalImage" src="" alt="Proof Image" style>
+    <button id="next-btn" onclick="showNextImage()" style="position:absolute; top:50%; transform:translateY(-50%); right:10px; background-color:#4CAF50; color:white; border:none; cursor:pointer; border-radius:50%; font-size:20px; padding:10px 15px;">&gt;</button>
+
+    
 </div>
+
 <!-- Modal Structure -->
 <div id="descriptionModal" class="modal">
     <div class="modal-content">
@@ -363,15 +383,15 @@ $resultReports = mysqli_query($conn, $queryReports);
         <div class="summary">
             <div class="summary-box">
                 <h2>Total Listed Plants</h2>
-                <p><strong><?php  ?></strong></p>
+                <p><strong><?php echo $totalListedPlants ?></strong></p>
             </div>
             <div class="summary-box">
                 <h2>Total Sold Plants</h2>
-                <p><strong><?php  ?></strong></p>
+                <p><strong><?php echo $totalSoldPlants  ?></strong></p>
             </div>
             <div class="summary-box">
                 <h2>Total Reports</h2>
-                <p><strong><?php ; ?></strong></p>
+                <p><strong><?php echo $totalReportedUsers; ?></strong></p>
             </div>
         </div>
 
@@ -523,6 +543,8 @@ function closeModal() {
 
 </script>
 
+
+
 </body>
 </html>
 
@@ -570,3 +592,4 @@ function closeModal() {
 }
 
 </style>
+

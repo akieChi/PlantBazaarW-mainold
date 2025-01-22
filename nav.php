@@ -208,6 +208,7 @@ if ($isLoggedIn) {
         <?php endif;?>
         <a href="index" id="home1">Home</a>
         <a href="plantCategories">Plants Categories</a>
+        
         <a href="#about">About</a>
         <a href="#contact">Contact</a>
         <?php if ($isLoggedIn): ?>
@@ -265,15 +266,6 @@ if ($isLoggedIn) {
             <div class="form-group">
                 <label for="signupEmail">Email</label>
                 <input type="email" id="signupEmail" name="email" placeholder="Email" required>
-                <p id="message"></p>
-                <button type="button" id="sendOtpButton">Send OTP</button>
-                <div id="otpTimer" style="display:none;">
-                    OTP expires in <span id="countdown">120</span> seconds
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="otpInput">Enter OTP:</label>
-                <input type="text" id="otpInput" name="otp" placeholder="Enter OTP" required>
             </div>
 
             <div class="form-group">
@@ -306,15 +298,35 @@ if ($isLoggedIn) {
                 <input type="text" id="signupLastName" name="lastname" placeholder="Last Name" required>
             </div>
 
-            <div class="form-group">
-                <label for="signupGender">Gender</label>
-                <select id="signupGender" name="gender" required>
-                    <option value="" disabled selected>Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+    <label for="signupGender" style="
+        display: block;
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+        font-family: Arial, sans-serif;">
+        Gender
+    </label>
+    <select id="signupGender" name="gender" required style="
+        width: 100%;
+        padding: 8px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        background-color: #fff;
+        color: #333;
+        font-family: Verdana, Geneva, Tahoma, sans-serif
+        cursor: pointer;"
+        onfocus="this.style.borderColor='#007bff'; this.style.boxShadow='0 0 5px rgba(0, 123, 255, 0.5)';"
+        onblur="this.style.borderColor='#ccc'; this.style.boxShadow='none';">
+        <option value="" disabled selected>Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+    </select>
+</div>
 
             <div class="form-group">
                 <label for="signupPhoneNumber">Phone Number</label>
@@ -343,6 +355,16 @@ if ($isLoggedIn) {
             <div class="form-group">
                 <label for="signupProfilePicture">Profile Picture</label>
                 <input type="file" id="signupProfilePicture" name="profilePicture" accept="image/*">
+
+                <p id="message"></p>
+                <button type="button" id="sendOtpButton">Send OTP</button>
+                <div id="otpTimer" style="display:none;">
+                    OTP expires in <span id="countdown">120</span> seconds
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="otpInput">Enter OTP:</label>
+                <input type="text" id="otpInput" name="otp" placeholder="Enter OTP" required>
             </div>
 
             <!-- Submit Button -->

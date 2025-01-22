@@ -58,11 +58,10 @@ if ($isLoggedIn) {
 <div class="container">
     <!-- Categories Container -->
     <button id="openCategoriesModal" class="categories-modal-btn">Filter Categories</button>
-
     <!-- Categories Container for Desktop -->
     <div class="categories-container">
         <!-- Plant Type -->
-        <div class="plant-type">
+        <div style="height:210px; overflow: auto;" class="plant-type" >
             <h3>Plant Type</h3>
             <button class="clear-all">Clear All</button> <!-- Clear All Button -->
             <div class="plant-type-items">
@@ -81,7 +80,7 @@ if ($isLoggedIn) {
         </div>
 
      <!-- Plant Size -->
-        <div class="plant-size">
+        <div style="height:210px; overflow: auto;" class="plant-size">
             <h3>Filter by Size</h3>
             <button class="clear-all">Clear All</button> <!-- Clear All Button -->
             <div class="plant-size-items">
@@ -92,7 +91,7 @@ if ($isLoggedIn) {
         </div>
 
      <!-- Plant Location -->
-     <div class="plant-location">
+     <div  style="height:210px; overflow: auto;" class="plant-location">
             <h3>Filter by Location</h3>
             <button class="clear-all">Clear All</button> <!-- Clear All Button -->
             <div id="locationCheckboxes"></div> <!-- Dynamic Location Checkboxes -->
@@ -168,31 +167,70 @@ if ($isLoggedIn) {
     <div id="pagination-container"></div> <!-- Pagination -->
 </div>
 </div>
+<style>
+    /* Scrollbar customization for Webkit browsers */
+.plant-type::-webkit-scrollbar,
+.plant-size::-webkit-scrollbar,
+.plant-location::-webkit-scrollbar {
+    width: 10px; /* Width of the scrollbar */
+}
+
+.plant-type::-webkit-scrollbar-thumb,
+.plant-size::-webkit-scrollbar-thumb,
+.plant-location::-webkit-scrollbar-thumb {
+    background-color: #ccc; /* Thumb color */
+    border-radius: 10px; /* Rounded edges for the thumb */
+    width: 8px; /* Width of the thumb */
+}
+
+.plant-type::-webkit-scrollbar-thumb:hover,
+.plant-size::-webkit-scrollbar-thumb:hover,
+.plant-location::-webkit-scrollbar-thumb:hover {
+    background-color: #888; /* Thumb color on hover */
+}
+
+.plant-type::-webkit-scrollbar-track,
+.plant-size::-webkit-scrollbar-track,
+.plant-location::-webkit-scrollbar-track {
+    background-color: #f1f1f1; /* Track color */
+    border-radius: 10px; /* Rounded edges for the track */
+}
+</style>
+
 <?php include 'footer.php';?>
 <script src="script.js"></script>
 <script>
 $(document).ready(function () {
-    const plantsPerPage = 6; // Set number of plants per page
+    const plantsPerPage = 6;
     let currentPage = 1;
-    let allPlants = []; // Store all plants for pagination
+    let allPlants = [];
 
-// Variables for logged-in state and user email
+    // Global filter state object
+    const filterState = {
+        locations: [],
+        sizes: [],
+        types: [],
+        searchTerm: '',
+        sortOrder: ''
+    };
+
+    // Variables for logged-in state and user email
     const isLoggedIn = <?php echo json_encode($isLoggedIn); ?>;
     const userEmail = <?php echo json_encode($email); ?>;
-    // Fetch Newly Listed Plants via AJAX
+
     function fetchPlants() {
         $.ajax({
             url: 'Ajax/fetch_categories.php',
             type: 'GET',
             dataType: 'json',
             success: function (response) {
-                allPlants = response; // Store response for pagination
+                allPlants = response;
                 if (!allPlants.length) {
                     $('#newly-contents').html("<p>No plants available at the moment.</p>");
                     return;
                 }
-                loadPlants(currentPage); // Initial load with pagination
-                setupCheckboxes(allPlants); // Setup filters based on fetched plants
+                loadPlants(currentPage);
+                setupCheckboxes(allPlants);
             },
             error: function (xhr, status, error) {
                 Swal.fire({
@@ -205,364 +243,232 @@ $(document).ready(function () {
     }
 
     function setupCheckboxes(plants) {
-        let locations = [...new Set(plants.map(p => p.city))]; // Unique location names
-        let sizes = [...new Set(plants.map(p => p.plantSize))]; // Unique plant sizes
-        let types = [...new Set(plants.map(p => p.plantcategories))]; // Unique plant categories
+        let locations = [...new Set(plants.map(p => p.city))];
+        let sizes = [...new Set(plants.map(p => p.plantSize))];
+        let types = [...new Set(plants.map(p => p.plantcategories))];
 
-        // Create location checkboxes dynamically
         let locationCheckboxesHtml = locations.map(location =>
             `<label>
                 <input type="checkbox" class="location-checkbox" value="${location}">
                 ${location}
             </label><br>`).join('');
 
-        $('#locationCheckboxes').html(locationCheckboxesHtml);
-        $('#locationCheckboxesMobile').html(locationCheckboxesHtml);
+        $('#locationCheckboxes, #locationCheckboxesMobile').html(locationCheckboxesHtml);
 
-        // Handle checkbox change events for filtering
+        // Event listeners for filters
         $('.location-checkbox, .size-checkbox, .category-checkbox').on('change', filterPlants);
     }
 
     function loadPlants(page = 1) {
-        let totalPages = Math.ceil(allPlants.length / plantsPerPage);
-        let paginatedPlants = allPlants.slice((page - 1) * plantsPerPage, page * plantsPerPage);
+        // Apply filters first
+        let filteredPlants = allPlants.filter(function (plant) {
+            let plantLocation = plant.city;
+            let plantSize = plant.plantSize;
+            let plantType = plant.plantcategories;
+            let plantName = plant.plantname.toLowerCase();
+
+            let matchesType = filterState.types.length === 0 || filterState.types.includes(plantType);
+            let matchesLocation = filterState.locations.length === 0 || filterState.locations.includes(plantLocation);
+            let matchesSize = filterState.sizes.length === 0 || filterState.sizes.includes(plantSize);
+            let matchesSearchTerm = !filterState.searchTerm || plantName.includes(filterState.searchTerm);
+
+            return matchesType && matchesLocation && matchesSize && matchesSearchTerm;
+        });
+
+        // Apply sorting
+        if (filterState.sortOrder === 'low') {
+            filteredPlants.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+        } else if (filterState.sortOrder === 'high') {
+            filteredPlants.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+        }
+
+        let totalPages = Math.ceil(filteredPlants.length / plantsPerPage);
+        let paginatedPlants = filteredPlants.slice((page - 1) * plantsPerPage, page * plantsPerPage);
+        
+        currentPage = page;
         displayPlants(paginatedPlants);
         renderPagination(totalPages, page);
     }
 
     function displayPlants(plantsToDisplay) {
-    let contentHtml = plantsToDisplay.map(product => {
-        // Check if the user is logged in and if the seller is not the logged-in user
-        let chatButtonHtml = '';
-
-        // Conditionally display the chat button only if logged in and the user is not the seller
-        if (isLoggedIn && userEmail !== product.seller_email) {
-                chatButtonHtml = `<button class="chat-seller" data-email="${product.seller_email}">Chat Seller</button>`;
+        let contentHtml = plantsToDisplay.map(product => {
+            let chatButtonHtml = '';
+            if (isLoggedIn && userEmail !== product.seller_email) {
+                chatButtonHtml = `<button class="chat-seller" data-email="${product.seller_email}" data-id="${product.plantid}" >Chat Seller</button>`;
             }
 
-        return `<div class="plant-item" data-location="${product.city}" data-category="${product.plantcategories}" data-size="${product.plantSize}" data-price="${product.price}">
-            <div class="plant-image">
-                <img style="width: 100%; height: 100%; object-fit: cover;" src="Products/${product.seller_email}/${product.img1}" alt="${product.plantname}" onerror="this.onerror=null; this.src='placeholder.jpg';">
-            </div>
-            <p>${product.plantname}</p>
-            <p>Price: ₱${product.price}</p>
-            <p>Category: ${product.plantcategories}</p>
-            <p>Size: ${product.plantSize}</p>
-            <div class="plant-item-buttons">
-                <button class="view-details" data-id="${product.plantid}" data-email="${product.seller_email}">View more details</button>
-                ${chatButtonHtml} <!-- Conditionally render chat button -->
-            </div>
-        </div>`;
-    }).join('');
-    $('#newly-contents').html(contentHtml);
-}
-
-
-
-function renderPagination(totalPages, current) {
-    if (totalPages <= 1) return;
-
-    let paginationHtml = '';
-    
-    // Add Previous button
-    paginationHtml += `
-        <button class="page-link prev-btn" ${current === 1 ? 'disabled' : ''} data-page="${current - 1}">
-            &laquo; Prev
-        </button>
-    `;
-
-    function addPageButton(pageNum) {
-        paginationHtml += `
-            <button class="page-link ${pageNum === current ? 'active' : ''}" 
-                    data-page="${pageNum}">
-                ${pageNum}
-            </button>
-        `;
+            return `<div class="plant-item" data-location="${product.city}" data-category="${product.plantcategories}" data-size="${product.plantSize}" data-price="${product.price}">
+                <div style="width: 280px; height: 200px; overflow: hidden;" class="plant-image">
+                    <img style="width: 100%; height: 100%; object-fit: cover;" src="Products/${product.seller_email}/${product.img1}" alt="${product.plantname}" onerror="this.onerror=null; this.src='placeholder.jpg';">
+                </div>
+                <p>${product.plantname}</p>
+                <p>Price: ₱${product.price}</p>
+                <p>Category: ${product.plantcategories}</p>
+                <p>Size: ${product.plantSize}</p>
+                <div class="plant-item-buttons">
+                    <button class="view-details" data-id="${product.plantid}" data-email="${product.seller_email}">View more details</button>
+                    ${chatButtonHtml}
+                </div>
+            </div>`;
+        }).join('');
+        $('#newly-contents').html(contentHtml);
     }
 
-    // Logic for showing page numbers with ellipsis
-    if (totalPages <= 5) {
-        // If 5 or fewer pages, show all
-        for (let i = 1; i <= totalPages; i++) {
-            addPageButton(i);
-        }
-    } else {
-        // Always show first page
-        addPageButton(1);
+    function filterPlants() {
+        // Update filter state
+        filterState.searchTerm = $('#searchBar').val().toLowerCase();
+        filterState.locations = $('.location-checkbox:checked').map(function () {
+            return $(this).val();
+        }).get();
+        filterState.sizes = $('.size-checkbox:checked').map(function () {
+            return $(this).val();
+        }).get();
+        filterState.types = $('.category-checkbox:checked').map(function () {
+            return $(this).val();
+        }).get();
 
-        if (current <= 3) {
-            // Near the start
-            addPageButton(2);
-            addPageButton(3);
-            addPageButton(4);
-            paginationHtml += '<span class="ellipsis">...</span>';
-            addPageButton(totalPages);
-        } else if (current >= totalPages - 2) {
-            // Near the end
-            paginationHtml += '<span class="ellipsis">...</span>';
-            addPageButton(totalPages - 3);
-            addPageButton(totalPages - 2);
-            addPageButton(totalPages - 1);
-            addPageButton(totalPages);
-        } else {
-            // In the middle
-            paginationHtml += '<span class="ellipsis">...</span>';
-            addPageButton(current - 1);
-            addPageButton(current);
-            addPageButton(current + 1);
-            paginationHtml += '<span class="ellipsis">...</span>';
-            addPageButton(totalPages);
-        }
+        // Reset to first page and load filtered results
+        currentPage = 1;
+        loadPlants(currentPage);
     }
 
-    // Add Next button
-    paginationHtml += `
-        <button class="page-link next-btn" ${current === totalPages ? 'disabled' : ''} data-page="${current + 1}">
-            Next &raquo;
-        </button>
-    `;
-
-    // Add HTML to container
-    $('#pagination-container').html(paginationHtml);
-
-    // Event handlers
-    $('.page-link').on('click', function() {
-        if ($(this).is('[disabled]') || $(this).hasClass('active')) {
+    function renderPagination(totalPages, current) {
+        if (totalPages <= 1) {
+            $('#pagination-container').html('');
             return;
         }
-        
-        const newPage = $(this).data('page');
-        if (newPage >= 1 && newPage <= totalPages) {
-            scrollToTop();
-            loadPlants(newPage);
+
+        let paginationHtml = `
+            <button class="page-link prev-btn" ${current === 1 ? 'disabled' : ''} data-page="${current - 1}">
+                &laquo; Prev
+            </button>`;
+
+        // Always show first page
+        paginationHtml += `<button class="page-link ${current === 1 ? 'active' : ''}" data-page="1">1</button>`;
+
+        // Calculate range to show
+        let startPage = Math.max(2, current - 1);
+        let endPage = Math.min(totalPages - 1, current + 1);
+
+        // Add first ellipsis if needed
+        if (current > 3) {
+            paginationHtml += '<span class="ellipsis">...</span>';
         }
-    });
-}
-// Function to handle scrolling to top
-function scrollToTop() {
-    // First try using smooth scroll behavior
-    if ('scrollBehavior' in document.documentElement.style) {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
+
+        // Add middle pages
+        for (let i = startPage; i <= endPage; i++) {
+            if (i <= totalPages - 1 && i > 1) {
+                paginationHtml += `
+                    <button class="page-link ${i === current ? 'active' : ''}" data-page="${i}">
+                        ${i}
+                    </button>`;
+            }
+        }
+
+        // Add last ellipsis if needed
+        if (current < totalPages - 2) {
+            paginationHtml += '<span class="ellipsis">...</span>';
+        }
+
+        // Always show last page if there's more than one page
+        if (totalPages > 1) {
+            paginationHtml += `
+                <button class="page-link ${current === totalPages ? 'active' : ''}" data-page="${totalPages}">
+                    ${totalPages}
+                </button>`;
+        }
+
+        paginationHtml += `
+            <button class="page-link next-btn" ${current === totalPages ? 'disabled' : ''} data-page="${current + 1}">
+                Next &raquo;
+            </button>`;
+
+        $('#pagination-container').html(paginationHtml);
+
+        // Pagination click handlers
+        $('.page-link').on('click', function() {
+            if ($(this).is('[disabled]') || $(this).hasClass('active')) {
+                return;
+            }
+
+            const newPage = $(this).data('page');
+            if (newPage >= 1 && newPage <= totalPages) {
+                scrollToTop();
+                loadPlants(newPage);
+            }
         });
-    } else {
-        // Fallback for browsers that don't support smooth scrolling
-        $('html, body').animate({ scrollTop: 0 }, 300);
     }
-}
-    function filterPlants() {
-        let searchTerm = $('#searchBar').val().toLowerCase();
-        let selectedLocations = $('.location-checkbox:checked').map(function () {
-            return $(this).val();
-        }).get();
-        let selectedSizes = $('.size-checkbox:checked').map(function () {
-            return $(this).val();
-        }).get();
-        let selectedTypes = $('.category-checkbox:checked').map(function () {
-            return $(this).val();
-        }).get();
 
-        // Filter plants based on selected checkboxes and search term
-        let filteredPlants = allPlants.filter(function (plant) {
-            let plantLocation = plant.city;
-            let plantSize = plant.plantSize;
-            let plantType = plant.plantcategories;
-            let plantName = plant.plantname.toLowerCase(); // Lowercase for comparison
-
-            let matchesType = selectedTypes.length === 0 || selectedTypes.includes(plantType);
-            let matchesLocation = selectedLocations.length === 0 || selectedLocations.includes(plantLocation);
-            let matchesSize = selectedSizes.length === 0 || selectedSizes.includes(plantSize);
-            let matchesSearchTerm = plantName.includes(searchTerm); // Check if plant name includes search term
-
-            return matchesType && matchesLocation && matchesSize && matchesSearchTerm; // Ensure all criteria match
-        });
-        
-                $(document).ready(function () {
-            $('#searchBar').on('input', function () {
-                let searchTerm = $(this).val().trim();
-                
-                if (searchTerm) {
-                    $('#clearSearch').show().addClass('active'); // Show "X" icon
-                    filterPlants(); // Call filter function to display filtered plants
-                } else {
-                    $('#clearSearch').hide().removeClass('active'); // Show search icon
-                    displayPlants(allPlants); // Reset to default view when input is cleared
-                }
+    function scrollToTop() {
+        if ('scrollBehavior' in document.documentElement.style) {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
             });
-
-            $('#clearSearch').on('click', function () {
-                $('#searchBar').val(''); // Clear the search input
-                $(this).hide().removeClass('active'); // Switch back to search icon
-                displayPlants(allPlants); // Reset to default view
-            });
-        });
-
-        $(document).ready(function () {
-    // Check search bar state on page load and show the appropriate icon
-    toggleSearchIcon();
-
-    // Toggle between search and "X" icon based on input
-    $('#searchBar').on('input', function () {
-        toggleSearchIcon();
-        let searchTerm = $(this).val().trim().toLowerCase();
-
-        if (searchTerm) {
-            filterPlants(); // Call the filtering function
         } else {
-            displayPlants(allPlants); // Reset to default plant list
+            $('html, body').animate({ scrollTop: 0 }, 300);
         }
+    }
+
+    // Event Handlers
+    $('.clear-all').on('click', function () {
+        $(this).closest('.plant-type, .plant-size, .plant-location')
+            .find('input[type="checkbox"]')
+            .prop('checked', false);
+        filterPlants();
     });
 
-    // Clear search bar and reset plant list when "X" button is clicked
+    $('#sortPrice').on('change', function() {
+        filterState.sortOrder = $(this).val();
+        filterPlants();
+    });
+
+    $('#searchBar').on('input', function () {
+        filterPlants();
+        toggleSearchIcon();
+    });
+
     $('#clearSearch').on('click', function () {
-        $('#searchBar').val(''); // Clear search input
-        toggleSearchIcon(); // Update icons
-        displayPlants(allPlants); // Reset to default plant list
+        $('#searchBar').val('');
+        filterState.searchTerm = '';
+        toggleSearchIcon();
+        filterPlants();
     });
 
-    // Function to toggle the icons based on search bar input
     function toggleSearchIcon() {
         if ($('#searchBar').val().trim()) {
-            $('#searchIcon').hide(); // Hide search icon
-            $('#clearIcon').show();  // Show "X" icon
+            $('#clearSearch').show().addClass('active');
         } else {
-            $('#searchIcon').show(); // Show search icon when input is empty
-            $('#clearIcon').hide();  // Hide "X" icon
-        }
-    }
-});
-
-function filterPlants() {
-    let searchTerm = $('#searchBar').val().toLowerCase();
-    let selectedLocations = $('.location-checkbox:checked').map(function () {
-        return $(this).val();
-    }).get();
-    let selectedSizes = $('.size-checkbox:checked').map(function () {
-        return $(this).val();
-    }).get();
-    let selectedTypes = $('.category-checkbox:checked').map(function () {
-        return $(this).val();
-    }).get();
-
-    // Filter plants based on selected checkboxes and search term
-    let filteredPlants = allPlants.filter(function (plant) {
-        let plantLocation = plant.city;
-        let plantSize = plant.plantSize;
-        let plantType = plant.plantcategories;
-        let plantName = plant.plantname.toLowerCase();
-
-        let matchesType = selectedTypes.length === 0 || selectedTypes.includes(plantType);
-        let matchesLocation = selectedLocations.length === 0 || selectedLocations.includes(plantLocation);
-        let matchesSize = selectedSizes.length === 0 || selectedSizes.includes(plantSize);
-        let matchesSearchTerm = plantName.includes(searchTerm);
-
-        return matchesType && matchesLocation && matchesSize && matchesSearchTerm;
-    });
-
-    // Display the filtered plants
-    displayPlants(filteredPlants);
-}
-
-
-
-$(document).ready(function () {
-    // Function to toggle icons based on search input content
-    function toggleSearchIcon() {
-        if ($('#searchBar').val().trim() !== "") {
-            $('#searchIcon').hide(); // Hide the search icon
-            $('#clearSearch').show(); // Show the "X" clear button
-        } else {
-            $('#searchIcon').show(); // Show the search icon
-            $('#clearSearch').hide(); // Hide the "X" clear button
+            $('#clearSearch').hide().removeClass('active');
         }
     }
 
-    // Toggle icons based on typing in the search bar
-    $('#searchBar').on('input', function () {
-        toggleSearchIcon();
-
-        // Perform filtering when there is a search term
-        let searchTerm = $(this).val().trim();
-        if (searchTerm) {
-            filterPlants();
-        } else {
-            displayPlants(allPlants); // Reset to default view
-        }
-    });
-
-    // Clear the search bar when "X" is clicked and reset plant list
-    $('#clearSearch').on('click', function () {
-        $('#searchBar').val('');  // Clear the search input
-        toggleSearchIcon();       // Update icon visibility
-        displayPlants(allPlants); // Reset plant list to default
-    });
-
-    // Initial toggle to ensure icons are correctly displayed on load
-    toggleSearchIcon();
-});
-
-
-
-        // Reset current page and load filtered plants
-        currentPage = 1;
-        loadFilteredPlants(filteredPlants);
-    }
-
-    function loadFilteredPlants(filteredPlants) {
-        let totalPages = Math.ceil(filteredPlants.length / plantsPerPage);
-        let paginatedPlants = filteredPlants.slice((currentPage - 1) * plantsPerPage, currentPage * plantsPerPage);
-        displayPlants(paginatedPlants);
-        renderPagination(totalPages, currentPage);
-    }
-
-    // Clear All Button Logic
-    $('.clear-all').on('click', function () {
-        $(this).closest('.plant-type').find('input[type="checkbox"]').prop('checked', false);
-        $(this).closest('.plant-size').find('input[type="checkbox"]').prop('checked', false);
-        $(this).closest('.plant-location').find('input[type="checkbox"]').prop('checked', false);
-        currentPage = 1; // Reset to first page
-        filterPlants(); // Reapply filters to maintain filtering state
-    });
-
-    // Sorting Functionality
-    $('#sortPrice').on('change', function() {
-        let sortValue = $(this).val();
-        let sortedPlants = [...allPlants]; // Create a copy of the plants array for sorting
-
-        if (sortValue === 'low') {
-            sortedPlants.sort((a, b) => a.price - b.price);
-        } else if (sortValue === 'high') {
-            sortedPlants.sort((a, b) => b.price - a.price);
-        }
-
-        loadFilteredPlants(sortedPlants); // Load sorted plants
-    });
-
-    // Search Bar Logic
-    $('#searchBar').on('input', function () {
-        filterPlants(); // Filter plants on input change
-    });
-
-    // Initialize the fetch process
-    fetchPlants();
-
-    
-});
-// Open modal for categories on mobile
-$('#openCategoriesModal').on('click', function() {
+    // Mobile modal handlers
+    $('#openCategoriesModal').on('click', function() {
         $('#categoriesModal').addClass('show');
     });
 
     $('#closeCategoriesModal').on('click', function() {
         $('#categoriesModal').removeClass('show');
     });
-// Save filter state before navigating to the details page
-$(document).on('click', '.view-details', function () {
-                    let plantId = $(this).data('id');
-                    let sellerEmail = $(this).data('email');
-                    window.location.href = `viewdetails.php?plantId=${plantId}&sellerEmail=${sellerEmail}`;
-                });
+
+    // View details handler
+    $(document).on('click', '.view-details', function () {
+        let plantId = $(this).data('id');
+        let sellerEmail = $(this).data('email');
+        window.location.href = `viewdetails.php?plantId=${plantId}`;
+    });
+
+    $(document).on('click', '.chat-seller', function () {
+        let sellerEmail = $(this).data('email');
+        let plantId = $(this).data('id');
+        window.location.href = `chat_upgrade/chat.php?seller_email=${encodeURIComponent(sellerEmail)}&plantid=${encodeURIComponent(plantId)}`;
+    });
+
+    // Initialize
+    fetchPlants();
+    toggleSearchIcon();
+});
 </script>
  
 </body>

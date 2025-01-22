@@ -8,8 +8,8 @@
     <div class="contact" id="contact">
         <h2>Contact Us</h2>
         <p>If you have any questions or need assistance, we're here to help!</p>
-        <p>Email: <a href="mailto:support@plantbazaar.com">support@plantbazaar.com</a></p>
-        <p>Phone: <a href="tel:+18001234567">+1 (800) 123-4567</a></p>
+        <p>Email: <a href="mailto:support@plantbazaar.com">plantbazaar21@gmail.com</a></p>
+        <p>Phone: <a href="tel:+18001234567">09197657074</a></p>
     </div>
 </div>
 </footer>

@@ -1,3 +1,10 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
 /* General Layout for the Container */
 .container {
     display: flex;
@@ -62,6 +69,7 @@
     overflow: hidden;
 }
 
+
 .card-image-container img {
     max-width: 100%;
     height: auto;
@@ -90,9 +98,10 @@
     cursor: pointer;
     border-radius: 50%;
     font-size: 18px;
-    padding: 10px 15px;
+    padding: 15px 15px;
     z-index: 1000;
     pointer-events: all; /* Ensure buttons are clickable */
+
 }
 
 .card-image-controls button:hover {
@@ -142,8 +151,29 @@
     background: linear-gradient(to top, white, transparent); /* Gradual fade for 'View More' */
     text-align: center;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 20px;
     color: darkgreen;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    
+}
+.chat-seller {
+    width: 100%;
+    padding: 10px 10px;
+    border: none;
+    border-radius: 10px; /* Rounder buttons */
+    cursor: pointer;
+    color: #fff;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    font-size: 13px;
+    margin-top: 20px;
+}
+.chat-seller {
+    background-color: black;
+}
+
+.chat-seller:hover {
+    background-color: #333;
 }
 
 .view-more-btn:hover {
@@ -176,7 +206,9 @@
     color: #555;
 }
 
-.seller-profile button {
+.view-seller-profile-btn {
+    width: 100%;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
     padding: 10px 20px;
     background-color: darkgreen;
     color: white;
@@ -184,7 +216,13 @@
     border-radius: 10px;
     cursor: pointer;
     transition: background-color 0.3s;
+    font-size: 14px;
 }
+
+.view-seller-profile-btn:hover {
+    background-color: #388E3C; /* Optional: add a hover effect */
+}
+
 
 .seller-profile button:hover {
     background-color: #388E3C;
@@ -235,7 +273,7 @@
     background-color: #4CAF50;
     border: none;
     color: white;
-    padding: 10px 20px;
+    padding: 20px 20px;
     font-size: 20px;
     cursor: pointer;
     border-radius: 50%;
@@ -350,7 +388,10 @@
 
     .seller-profile h3 {
         font-size: 16px;
-    }
+    }h1, h2, h3 {
+    font-family: Arial, sans-serif;
+}
+
 }
 
 @media (max-width: 480px) {

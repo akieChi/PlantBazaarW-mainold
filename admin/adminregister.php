@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     mysqli_stmt_bind_param($stmt, 'ss', $username, $password);
 
     if (mysqli_stmt_execute($stmt)) {
-        echo "<script>alert('Admin registered successfully!'); window.location.href='adminlogin.php';</script>";
+        echo "<script>alert('Admin registered successfully!'); window.location.href='secureaccess2024.php';</script>";
     } else {
         echo "<script>alert('Registration failed!');</script>";
     }
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <h2>Admin Register</h2>
         <form method="POST">
             <input type="text" name="username" placeholder="Username" required><br>
-            <input type="password" name="password" placeholder="Password" required><br>
+            <input type="password" name="password" placeholder="Password" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$" title="Minimum 8 characters, at least one uppercase letter, one lowercase letter, one number and one special character" required><br>
             <button type="submit">Register</button>
         </form>
     </div>

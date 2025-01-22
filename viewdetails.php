@@ -3,9 +3,9 @@
 include 'conn.php';
 session_start();
 // Check if plantId and sellerEmail are set in the URL
-if (isset($_GET['plantId']) && isset($_GET['sellerEmail'])) {
+if (isset($_GET['plantId'])) {
     $plantId = $_GET['plantId'];
-    $sellerEmail = $_GET['sellerEmail'];
+    // $sellerEmail = $_GET['sellerEmail'];
 
     // Fetch plant details from the database
     $sql = "SELECT * FROM product WHERE plantid = ?";
@@ -110,8 +110,8 @@ function getImagePath($sellerEmail, $img) {
             <img id="plant-image"style="width:400px; height:400px; object-fit: cover;" src="<?php echo getImagePath($sellerEmail, $img1); ?>" alt="<?php echo $plantName; ?>">
 
             <div class="card-image-controls">
-                <button id="prev-btn"><</button>
-                <button id="next-btn">></button>
+                <button id="prev-btn" style="margin-left:2rem;"><</button>
+                <button id="next-btn" style="margin-right:2rem;">></button>
             </div>
         </div>
         <div class="card-content">
@@ -136,13 +136,20 @@ function getImagePath($sellerEmail, $img) {
         <div class="seller-info">
             <img src="ProfilePictures/<?php echo $sellerProfilePicture; ?>" alt="Seller Profile">
             <h3><?php echo $sellerFirstname . ' ' . $sellerLastname; ?></h3>
-            <p class="small">@<?php echo $sellerData['email']; ?></p>
         </div>
         <br>
-        <form action="profile.php" method="get">
+    <form action="profile.php" method="get">
         <input type="hidden" name="sellerId" value="<?php echo $sellerId; ?>">
-        <button type="submit">View Seller Profile</button>
+        <button type="submit" class="view-seller-profile-btn">View Seller Profile</button>
 </form>
+<?php if (isset($_SESSION['email']) && $sellerEmail !== $_SESSION['email']) {
+    echo '<button class="chat-seller" data-email="' . $sellerEmail . '">Chat Seller</button>';
+} else {
+    echo '<button class="chat-seller" style="display: none;" disabled>Chat Seller</button>';
+}
+?>
+
+
 </div>
 </div>
     <!-- Modal for Image Zoom -->
@@ -157,8 +164,7 @@ function getImagePath($sellerEmail, $img) {
     
 
     <script>
-        // Modal functionality
-        document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById('imageModal');
     const zoomedImage = document.getElementById('zoomed-image');
     const closeModal = document.getElementById('closeModal');
@@ -166,25 +172,42 @@ function getImagePath($sellerEmail, $img) {
     const nextBtn = document.getElementById('next-btn');
     const zoomPrevBtn = document.getElementById('zoom-prev-btn');
     const zoomNextBtn = document.getElementById('zoom-next-btn');
+    const viewMoreBtn = document.querySelector('.view-more-btn');
+    const cardContent = document.querySelector('.card-content');
 
+    // Filter out empty, null, or default images
     let images = [
-        '<?php echo getImagePath($sellerEmail, $img1); ?>',
-        '<?php echo getImagePath($sellerEmail, $img2); ?>',
-        '<?php echo getImagePath($sellerEmail, $img3); ?>'
-    ].filter(image => image && image !== 'default-image.jpg'); // Filter out empty or default images
+        '<?php echo $img1 ? getImagePath($sellerEmail, $img1) : null; ?>',
+        '<?php echo $img2 ? getImagePath($sellerEmail, $img2) : null; ?>',
+        '<?php echo $img3 ? getImagePath($sellerEmail, $img3) : null; ?>'
+    ].filter(image => image && image !== 'default-image.jpg' && image !== '');
+
     let currentIndex = 0;
 
     function showImage(index) {
-        zoomedImage.src = images[index];
-        document.getElementById('plant-image').src = images[index];
+        if (images.length > 0) {
+            zoomedImage.src = images[index];
+            document.getElementById('plant-image').src = images[index];
+        }
     }
 
     // Hide navigation buttons if there is only one image
-    if (images.length <= 1) {
-        prevBtn.style.display = 'none';
-        nextBtn.style.display = 'none';
-        zoomPrevBtn.style.display = 'none';
-        zoomNextBtn.style.display = 'none';
+    function updateNavigationButtons() {
+        const shouldShowButtons = images.length > 1;
+        prevBtn.style.display = shouldShowButtons ? 'block' : 'none';
+        nextBtn.style.display = shouldShowButtons ? 'block' : 'none';
+        zoomPrevBtn.style.display = shouldShowButtons ? 'block' : 'none';
+        zoomNextBtn.style.display = shouldShowButtons ? 'block' : 'none';
+    }
+
+    updateNavigationButtons();
+
+    // View More functionality
+    if (viewMoreBtn && cardContent) {
+        viewMoreBtn.addEventListener('click', function () {
+            cardContent.classList.toggle('expanded');
+            viewMoreBtn.textContent = cardContent.classList.contains('expanded') ? 'View Less' : 'View More';
+        });
     }
 
     prevBtn.addEventListener('click', function () {
@@ -214,13 +237,87 @@ function getImagePath($sellerEmail, $img) {
 
     // Open modal on image click
     document.querySelector('.card-image-container img').addEventListener('click', function () {
-        modal.style.display = "flex"; // Show modal
-        showImage(currentIndex); // Show the current image
+        modal.style.display = "flex";
+        showImage(currentIndex);
     });
 });
 
-          // JavaScript for handling the "View More" button
-          document.addEventListener('DOMContentLoaded', function () {
+// jQuery section
+$(document).ready(function() {
+    // Filter out empty, null, or default images
+    let images = [
+        '<?php echo $img1 ? getImagePath($sellerEmail, $img1) : null; ?>',
+        '<?php echo $img2 ? getImagePath($sellerEmail, $img2) : null; ?>',
+        '<?php echo $img3 ? getImagePath($sellerEmail, $img3) : null; ?>'
+    ].filter(image => image && image !== 'default-image.jpg' && image !== '');
+
+    let currentImageIndex = 0;
+
+    const plantImage = $('#plant-image');
+    const modal = $('#imageModal');
+    const zoomedImage = $('#zoomed-image');
+    const closeModal = $('#closeModal');
+    const prevBtn = $('#prev-btn');
+    const nextBtn = $('#next-btn');
+    const zoomPrevBtn = $('#zoom-prev-btn');
+    const zoomNextBtn = $('#zoom-next-btn');
+
+    // Update navigation buttons visibility
+    function updateNavigationButtons() {
+        const shouldShowButtons = images.length > 1;
+        prevBtn.toggle(shouldShowButtons);
+        nextBtn.toggle(shouldShowButtons);
+        zoomPrevBtn.toggle(shouldShowButtons);
+        zoomNextBtn.toggle(shouldShowButtons);
+    }
+
+    updateNavigationButtons();
+
+    plantImage.on('click', function() {
+        modal.show();
+        zoomedImage.attr('src', images[currentImageIndex]);
+    });
+
+    closeModal.on('click', function() {
+        modal.hide();
+    });
+
+    prevBtn.on('click', function() {
+        if (images.length > 1) {
+            currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+            plantImage.attr('src', images[currentImageIndex]);
+        }
+    }); 
+    
+    nextBtn.on('click', function() {
+        if (images.length > 1) {
+            currentImageIndex = (currentImageIndex + 1) % images.length;
+            plantImage.attr('src', images[currentImageIndex]);
+        }
+    });
+
+    zoomPrevBtn.on('click', function() {
+        if (images.length > 1) {
+            currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+            zoomedImage.attr('src', images[currentImageIndex]);
+        }
+    });
+
+    zoomNextBtn.on('click', function() {
+        if (images.length > 1) {
+            currentImageIndex = (currentImageIndex + 1) % images.length;
+            zoomedImage.attr('src', images[currentImageIndex]);
+        }
+    });
+
+    $(window).on('click', function(event) {
+        if (event.target == modal[0]) {
+            modal.hide();
+        }
+    });
+
+    // JavaScript for handling the "View More" button
+    document.addEventListener('DOMContentLoaded', function () {
             const viewMoreBtn = document.querySelector('.view-more-btn');
             const cardContent = document.querySelector('.card-content');
 
@@ -236,64 +333,7 @@ function getImagePath($sellerEmail, $img) {
             }
         });
       $(document).ready(function() {
-      
 
-//     // Array of image paths
-    let images = [
-        '<?php echo getImagePath($sellerEmail, $img1); ?>',
-        '<?php echo getImagePath($sellerEmail, $img2); ?>',
-        '<?php echo getImagePath($sellerEmail, $img3); ?>'
-     ];
-
-    let currentImageIndex = 0;
-
-     const plantImage = $('#plant-image');
-    const modal = $('#imageModal');
-    const zoomedImage = $('#zoomed-image');
-   const closeModal = $('#closeModal');
-   const prevBtn = $('#prev-btn');
-   const nextBtn = $('#next-btn');
-    const zoomPrevBtn = $('#zoom-prev-btn');
-    const zoomNextBtn = $('#zoom-next-btn');
-
-   // Zoom in on image click
-     plantImage.on('click', function() {
-       modal.show();
-        zoomedImage.attr('src', images[currentImageIndex]);
-    });
-
-     // Close modal
-     closeModal.on('click', function() {
-        modal.hide();
-     });
-
-    // Navigate images in the card
-     prevBtn.on('click', function() {
-        currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
-         plantImage.attr('src', images[currentImageIndex]);
-     }); 
-    
-     nextBtn.on('click', function() {
-         currentImageIndex = (currentImageIndex + 1) % images.length;
-         plantImage.attr('src', images[currentImageIndex]);
-     });
-
-     // Navigate images in the zoomed modal
-     zoomPrevBtn.on('click', function() {
-         currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
-         zoomedImage.attr('src', images[currentImageIndex]);
-     });
-
-     zoomNextBtn.on('click', function() {
-         currentImageIndex = (currentImageIndex + 1) % images.length;
-         zoomedImage.attr('src', images[currentImageIndex]);
-     });
-
-     // Close modal when clicking outside
-    $(window).on('click', function(event) {
-        if (event.target == modal[0]) {
-            modal.hide();
-        }
     });
 });
 

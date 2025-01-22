@@ -1,8 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 include '../conn.php';
 
 header('Content-Type: application/json'); // Set header for JSON response
@@ -15,7 +11,7 @@ $sql = "
     INNER JOIN users u ON s.user_id = u.id
     WHERE p.listing_status = 1
     ORDER BY p.createdAt DESC
-    LIMIT 10
+    LIMIT 12
 "; 
 
 $result = $conn->query($sql);

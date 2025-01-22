@@ -11,6 +11,7 @@ if (!isset($_SESSION['email']) || empty($_SESSION['email'])) {
 
 // Get seller's email from the query parameter
 $sellerEmail = isset($_GET['seller_email']) ? mysqli_real_escape_string($conn, $_GET['seller_email']) : '';
+$plantId = isset($_GET['plantid']) ? mysqli_real_escape_string($conn, $_GET['plantid']) : '';
 
 if ($sellerEmail === '') {
     // Redirect if no seller email is provided
@@ -23,11 +24,12 @@ $sellerQuery = "SELECT * FROM users WHERE email = '$sellerEmail'";
 $sellerResult = mysqli_query($conn, $sellerQuery);
 $seller = mysqli_fetch_assoc($sellerResult);
 
+
 // Check if seller exists
-if (!$seller) {
-    header("location: some_page.php"); // Change to a valid page
-    exit();
-}
+// if (!$seller) {
+//     header("location: ../index"); // Change to a valid page
+//     exit();
+// }
 ?>
 
 <!DOCTYPE html>
@@ -40,13 +42,16 @@ if (!$seller) {
 </head>
 <body>
     <div class="container">
-        
+       
       
         <div class="chat-container">
 
             <div class="chat-user-container">
             <a href="javascript:history.back()" class="back-btn">Back</a>
             <h1>Chat with <?php echo htmlspecialchars($seller['firstname'] . ' ' . $seller['lastname']); ?></h1>
+            <?php 
+            echo $plantId;
+            ?>
             </div>
             <div class="message-container" id="message-container">
                 <!-- Messages will be loaded here -->
@@ -72,6 +77,7 @@ if (!$seller) {
     <script>
       $(document).ready(function() {
     const sellerEmail = <?php echo json_encode($sellerEmail); ?>; // Pass seller email from PHP
+    const plantId = <?php echo json_encode($plantId);?>; // Pass plant ID from query parameter
     const userId = <?php echo json_encode($_SESSION['user_id']); ?>; // Pass user ID from session
 
     // Variable to track if user is at the bottom
@@ -128,6 +134,7 @@ if (!$seller) {
                 data: {
                     message: message,
                     seller_email: sellerEmail,
+                    plantId:plantId,
                     user_id: userId
                 },
                 success: function() {

@@ -59,6 +59,8 @@ include 'nav.php';
 
     <div class="product-list">
         <h2>Your Listed Plants</h2>
+      
+        
         <div class="card-container">
             <!-- Products will be dynamically inserted here -->
         </div>
@@ -68,7 +70,7 @@ include 'nav.php';
     background-color: darkgreen; /* Blue background */
     color: white; /* White text */
     font-size: 12px; /* Medium font size */
-    padding: 10px 10px; /* Padding for height and width */
+    padding: 12px 12px; /* Padding for height and width */
     border: none; /* Remove default border */
     border-radius: 5px; /* Rounded corners */
     cursor: pointer; /* Pointer cursor on hover */
@@ -78,7 +80,7 @@ include 'nav.php';
 
 /* Hover effect */
 #viewSoldHistoryButton:hover {
-    background-color: #4CAF50; /* Darker blue on hover */
+    background-color: green; /* Darker blue on hover */
 }
 
 /* Active state */
@@ -237,10 +239,39 @@ button[type="submit"]:focus {
 }
 
 #openModalBtn1.add-plant-button:hover {
-    background-color: #4CAF50;
+    background-color: green;
 }
 
     </style>
+
+<h2>
+    <a href="history.php" style="
+        position: absolute;
+        background-color: darkgreen;
+        color: white;
+        font-size: 12px;
+        font-weight: normal;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        margin-left: 10px;
+        padding: 12px 10px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.1s ease;
+        text-decoration: none;
+        text-align: center;
+        font-family: Verdana, Geneva, Tahoma, sans-serif;"
+        
+       
+        onmouseover="this.style.backgroundColor='green';"
+        onmouseout="this.style.backgroundColor='darkgreen';"
+        onmousedown="this.style.transform='scale(0.98)'; this.style.backgroundColor='#1f6391';"
+        onmouseup="this.style.transform='scale(1)'; this.style.backgroundColor='green';"
+        onfocus="this.style.boxShadow='0 0 5px rgba(52, 152, 219, 0.5)';"
+        onblur="this.style.boxShadow='none';">
+        History
+    </a>
+</h2>
 
 
 <div id="editProductModal" class="modal">
@@ -517,7 +548,12 @@ function fetchProducts(page = 1, viewType='available') {
                     fontSize: '12px', // Font size
                     margin: '4px 2px', // Margin around the button
                     cursor: 'pointer', // Pointer cursor on hover
-                    borderRadius: '5px' // Rounded corners
+                    borderRadius: '5px', // Rounded corners
+                })
+                .hover(function() {
+                    $(this).css('backgroundColor', '#4CAF50'); // Change background on hover
+                }, function() {
+                    $(this).css('backgroundColor', 'darkgreen'); // Reset background on hover out
                 });
             // Create the Delete button
             const deleteButton = $('<button>')
@@ -534,8 +570,13 @@ function fetchProducts(page = 1, viewType='available') {
                             margin: '4px 2px', // Margin around the button
                             cursor: 'pointer', // Pointer cursor on hover
                             borderRadius: '5px' // Rounded corners
+                        })
+                        .hover(function() {
+                            $(this).css('backgroundColor', 'darkred'); // Change background on hover
+                        }, function() {
+                            $(this).css('backgroundColor', 'red'); // Reset background on hover out
                         });
-            const markAsSoldButton = $('<button>')
+           const markAsSoldButton = $('<button>')
                 .addClass('mark-sold-button') // Add a class for CSS styling
                 .data('plantid', product.plantid) // Store the plant ID in a data attribute
                 .text('Mark as Sold') // Set the button text
@@ -549,6 +590,11 @@ function fetchProducts(page = 1, viewType='available') {
                             margin: '4px 2px', // Margin around the button
                             cursor: 'pointer', // Pointer cursor on hover
                             borderRadius: '5px' // Rounded corners
+                        })
+                        .hover(function() {
+                            $(this).css('backgroundColor', '#e6e6e6'); // Change background on hover
+                        }, function() {
+                            $(this).css('backgroundColor', '#f9f9f9'); // Reset background on hover out
                         });
 
                     // Append buttons to the button container
@@ -558,6 +604,7 @@ function fetchProducts(page = 1, viewType='available') {
                     card.append(buttonContainer);
                     } else {
                     }
+
             // Append the buttonContainer to your product card
             // Example: $('#productCard').append(buttonContainer);
 
@@ -1008,37 +1055,65 @@ Swal.fire({
 
 $(document).on('click', '.mark-sold-button', function() {
     var plantId = $(this).data('plantid'); // Get the plant ID
-Swal.fire({
-    icon: 'warning',
-    title: 'Are you sure you want to mark this product as sold?',
-    showCancelButton: true,
-    confirmButtonText: 'Yes',
-    cancelButtonText: 'No',
-    reverseButtons: true
-}).then((result) => {
-    if (result.isConfirmed) {
-        $.ajax({
-        url: 'mark_as_sold.php', // Create this PHP file
+    $.ajax({
+        url: 'get_buyers.php', // This PHP file fetches the buyers associated with the plant
         type: 'POST',
         data: { plantid: plantId },
         success: function(response) {
-            Swal.fire({
-                position: 'center',
-                icon: 'success',
-                title: 'Product marked as sold',
-                showConfirmButton: false,
-                timer: 3000
-            })
-            setTimeout(function() {
-                window.location.reload(); // Refresh the page or handle as needed
-            }, 2000);
+            var users = JSON.parse(response);
+            console.log(users);
+            if (users.length > 0) {
+                var userOptions = '';
+                users.forEach(function(user) {
+                    console.log(user.proflePicture);
+                    var profile = '<img src="../../ProfilePictures/' + user.proflePicture + '" alt="Profile Picture class="profile-img" style="width: 30px; height: 30px; border-radius: 50%;">';
+                    userOptions += '<option value="' + user.firstname+ ' ' + user.lastname + '">'+ profile +' '+ user.lastname+ ' ' + user.firstname + '</option>';
+                });
+
+                // Show Swal popup to confirm and select the buyer
+                Swal.fire({
+                    title: 'Select Buyer',
+                    html: '<select id="buyerSelect" class="swal2-select">' + userOptions + '</select>',
+                    showCancelButton: true,
+                    confirmButtonText: 'Mark as Sold',
+                    cancelButtonText: 'Cancel',
+                    preConfirm: () => {
+                        return $('#buyerSelect').val();  // Get the selected user full name
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        var selectedUsername = result.value;
+                        // Make AJAX request to mark as sold
+                        $.ajax({
+                            url: 'mark_as_sold.php',
+                            type: 'POST',
+                            data: { plantid: plantId, userFullname: selectedUsername },
+                            success: function(response) {
+                                Swal.fire({
+                                    position: 'center',
+                                    icon: 'success',
+                                    title: 'Product marked as sold',
+                                    showConfirmButton: false,
+                                    timer: 3000
+                                })
+                                setTimeout(function() {
+                                    window.location.reload(); // Refresh the page or handle as needed
+                                }, 2000);
+                            },
+                            error: function() {
+                                Swal.fire('Error!', 'There was an issue marking the product as sold.', 'error');
+                            }
+                        });
+                    }
+                });
+            } else {
+                Swal.fire('No buyers found!', 'No users have interacted with this plant.', 'info');
+            }
         },
         error: function() {
-            alert('Error marking product as sold.');
+            Swal.fire('Error!', 'Failed to fetch users for this plant.', 'error');
         }
     });
-    }
-})
 });
    
 

@@ -350,9 +350,8 @@ body::-webkit-scrollbar-thumb {
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
-
 .button-container a:hover {
-    background-color: #2d5233; /* Darker green on hover */
+    background-color: #4CAF50; /* Darker green on hover */
 }
 
 .main-content {
@@ -549,7 +548,7 @@ textarea {
 }
 
 .pagination button {
-    background-color: green;
+    background-color: darkgreen;
     color: white;
     padding: 10px 15px;
     border: none;
@@ -595,3 +594,107 @@ select.region:focus {
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
+  
+
+    .sold-table {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #fff;
+    }
+    
+    .sold-table th,
+    .sold-table td {
+        display: flex;
+        width: 100%;
+        border: none;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    .sold-table th {
+        background: none;
+        color: #333;
+        font-size: 14px;
+        font-weight: normal; /* Normal font weight to match image */
+        width: 120px; /* Width for labels */
+        text-align: left;
+        padding: 8px 0; /* Vertical padding to align with input */
+    }
+    
+    .sold-table td {
+        background: none;
+        display: flex;
+        justify-content: flex-end; /* Right align the input */
+        flex: 1;
+    }
+    
+    .sold-table input {
+        width: 180px; /* Fixed width for input fields */
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+        background-color: #fff;
+    }
+    
+    .sold-table tr {
+        display: flex;
+        justify-content: flex-start; /* Align to the left */
+        align-items: center;
+        margin-bottom: 10px; /* Space between rows */
+        gap: 40px; /* Space between label and input */
+    }
+    
+    /* Remove any default table styling */
+    .sold-table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    /* Focus state for inputs */
+    .sold-table input:focus {
+        outline: none;
+        border-color: #666;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 480px) {
+        .sold-table tr {
+            gap: 20px; /* Less space on mobile */
+        }
+        
+        .sold-table input {
+            width: 150px; /* Slightly smaller on mobile */
+        }
+    }
+    #historyButton {
+        background-color: darkgreen;
+        color: white;
+        font-size: 12px;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.1s ease;
+        margin-left: 10px;
+    }
+    
+    /* Hover effect */
+    #historyButton:hover {
+        background-color: green;
+    }
+    
+    /* Active state */
+    #historyButton:active {
+        background-color: #1f6391;
+        transform: scale(0.98);
+    }
+    
+    /* Focus state */
+    #historyButton:focus {
+        outline: none;
+        box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+    }
+    

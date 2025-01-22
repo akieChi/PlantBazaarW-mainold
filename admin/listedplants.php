@@ -4,7 +4,7 @@ include '../conn.php'; // Include your connection file
 
 // Check if the admin is logged in
 if (!isset($_SESSION['admin'])) {
-    header('Location: adminlogin.php');
+    header('Location: secureaccess2024.php');
     exit();
 }
 
@@ -65,6 +65,12 @@ $query = "
     AND (LOWER(p.plantname) LIKE LOWER('%$searchTerm%') OR LOWER(p.details) LIKE LOWER('%$searchTerm%'))
 ";
 $result = mysqli_query($conn, $query);
+
+// Fetch the total number of reported users
+$queryReportedUsers = "SELECT COUNT(DISTINCT reported_user) AS total_reported_users FROM reports WHERE status = 'pending'";
+$resultReportedUsers = mysqli_query($conn, $queryReportedUsers);
+$rowReportedUsers = mysqli_fetch_assoc($resultReportedUsers);
+$totalReportedUsers = $rowReportedUsers['total_reported_users']; // Get the total number of reported users
 ?>
 
 <!DOCTYPE html>
@@ -255,7 +261,7 @@ button {
             </div>
             <div class="summary-box">
                 <h2>Total Reports</h2>
-                <p><strong><?php ; ?></strong></p>
+                <p><strong><?php echo $totalReportedUsers; ?></strong></p>
             </div>
         </div>
 

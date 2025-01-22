@@ -80,7 +80,6 @@ if (isset($_GET['recipient_id']) && !empty($_GET['recipient_id'])) {
             echo "<span class='ellipsis'>...</span>";
             echo "<div class='options-menu' style='display: none;'>";
             echo "<button class='reply-btn' data-message-id='{$row['id']}'>Reply</button>";
-            echo "<button class='delete-btn' data-message-id='{$row['id']}'>Delete</button>";
             echo "</div>"; // Close options-menu
             echo "</div>"; // Close message-options
 

@@ -64,10 +64,10 @@ if ($isLoggedIn) {
             <div class="nav1">
                 <a href="../index" id="home">Home</a>
                 <a href="../plantCategories">Plants Categories</a>
-                <a href="#" >About</a>
-                <a href="#">Contact Us</a>
+                <a href="#about" >About</a>
+                <a href="#contact">Contact Us</a>
                 <?php if ($isLoggedIn): ?>
-                <a href="#" id="chats">Chats</a>
+                <a href="../chat_upgrade/index" id="chats">Chats</a>
                 <?php endif;?> 
             </div>
             <div class="login-signup">
@@ -95,9 +95,18 @@ if ($isLoggedIn) {
             </a>
             <a><p>Hello, <?php echo $firstname . ' ' . $lastname; ?></p> </a>
         <?php endif;?>
-        <a href="#" id="home1">Home</a>
-        <a href="#" id="about1">About</a>
-        <a href="#">Contact</a>
+        <a href="../index" id="home1">Home</a>
+        <a href="../plantCategories">Plants Categories</a>
+        <?php if ($isSeller): ?>
+        <a href="../Seller/seller_dashboard">Seller Dashboard</a> <!-- Change the link as needed for the seller's dashboard -->
+    <?php else: ?>
+        <a href="applySeller.php" id="sellerApply" class="sellerApply">Be A Seller</a> <!-- Link to becoming a seller -->
+    <?php endif; ?>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <?php if ($isLoggedIn): ?>
+        <a href="chat_upgrade/index" id="chats">Chats</a>
+        <?php endif;?> 
         <?php if ($isLoggedIn): ?>
             <a href="#" id="logoutLink">Logout</a>
         <?php else:?>
@@ -113,7 +122,7 @@ if ($isLoggedIn) {
     <?php if ($isSeller): ?>
         <a href="../Seller/seller_dashboard">Seller Dashboard</a> <!-- Change the link as needed for the seller's dashboard -->
     <?php else: ?>
-        <a href="../applySeller.php" id="sellerApply" class="sellerApply">Be A Seller</a> <!-- Link to becoming a seller -->
+        <a href="applySeller.php" id="sellerApply" class="sellerApply">Be A Seller</a> <!-- Link to becoming a seller -->
     <?php endif; ?>
     <a href="../editprofile.php">Edit Profile</a>
     <a href="#" id="logoutLink">Logout</a>

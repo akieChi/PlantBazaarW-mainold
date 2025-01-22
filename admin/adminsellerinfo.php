@@ -4,7 +4,7 @@ include '../conn.php'; // Include your connection file
 
 // Check if the admin is logged in
 if (!isset($_SESSION['admin'])) {
-    header('Location: adminlogin.php');
+    header('Location: secureaccess2024.php');
     exit();
 }
 
@@ -349,7 +349,8 @@ $totalSoldPlants = $rowTotalSoldPlants['total_sold_plants']; // Get the total nu
                     const sellerDetails = `
                         <p><strong>Email:</strong> ${data.email}</p>
                         <p><strong>Phone Number:</strong> ${data.phoneNumber}</p>
-                        <p><strong>Address:</strong> ${data.address}</p>
+                        <p><strong>Region:</strong> ${data.region}</p>
+                        <p><strong>City:</strong> ${data.city}</p>
                     `;
                     document.getElementById('sellerDetails').innerHTML = sellerDetails;
                     document.getElementById('sellerModal').style.display = "block"; // Show the modal
